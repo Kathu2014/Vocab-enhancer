@@ -1,0 +1,55 @@
+import random
+
+# Words categorized by age groups
+age_group_words = {
+    '2-4': {
+        'apple': "A fruit that is red or green, often eaten by children.",
+        'milk': "A white liquid that comes from cows, often drunk by babies.",
+        'dog': "A common pet with four legs that barks.",
+        'ball': "A round object used in many games and sports.",
+        'book': "Something you read to learn stories or information."
+    },
+    '5-7': {
+        'table': "A piece of furniture with four legs used for eating or writing.",
+        'school': "A place where children go to learn.",
+        'house': "A building where people live, with rooms for eating and sleeping.",
+        'piano': "A musical instrument with keys that you play with your hands.",
+        'family': "A group of people who live together and are related."
+    }
+}
+
+# Function to start the game
+def start_game():
+    print("Welcome to Educational Guess the Word!")
+    print("Select your age range to start: (2-4 or 5-7)")
+
+    age_range = input("Enter age range (e.g., 2-4): ").strip()
+
+    if age_range not in age_group_words:
+        print("Sorry, we don't have words for that age range. Please choose from 2-4 or 5-7.")
+        return
+
+    # Choose a random word from the selected age group
+    word, hint = random.choice(list(age_group_words[age_range].items()))
+    print("\nHere is your hint: ")
+    print(hint)
+    
+    # Give the player 3 attempts to guess the word
+    attempts = 3
+    while attempts > 0:
+        guess = input(f"\nYou have {attempts} attempt(s) left. Guess the word: ").strip().lower()
+
+        if guess == word:
+            print("Correct! Great job!")
+            break
+        else:
+            print("Incorrect. Try again!")
+            attempts -= 1
+
+    if attempts == 0:
+        print(f"\nThe correct word was: {word}")
+        print("Better luck next time!")
+
+# Main execution
+if __name__ == "__main__":
+    start_game()
