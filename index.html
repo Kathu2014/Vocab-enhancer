@@ -1,23 +1,5 @@
 import React, { useState } from 'react';
 
-// Word dictionary for different age groups
-const words = {
-  '2-4': {
-    'apple': "A fruit that is red or green, often eaten by children.",
-    'dog': "A common pet with four legs that barks.",
-    'milk': "A white liquid that comes from cows, often drunk by babies.",
-    'ball': "A round object used in many games.",
-    'sun': "The star that gives us light and warmth."
-  },
-  '5-7': {
-    'table': "A piece of furniture with four legs used for eating or writing.",
-    'bicycle': "A two-wheeled vehicle that you pedal.",
-    'school': "A place where children go to learn.",
-    'family': "A group of people related to each other.",
-    'computer': "A device used for work, play, or learning."
-  }
-};
-
 const WordGame = () => {
   const [ageRange, setAgeRange] = useState('2-4');
   const [currentWord, setCurrentWord] = useState('');
@@ -26,6 +8,23 @@ const WordGame = () => {
   const [attemptsLeft, setAttemptsLeft] = useState(3);
   const [message, setMessage] = useState('Press "New Word" to start! 🎮');
   const [gameActive, setGameActive] = useState(false);
+
+  const words = {
+    '2-4': {
+      'apple': "A fruit that is red or green, often eaten by children.",
+      'dog': "A common pet with four legs that barks.",
+      'milk': "A white liquid that comes from cows, often drunk by babies.",
+      'ball': "A round object used in many games.",
+      'sun': "The star that gives us light and warmth."
+    },
+    '5-7': {
+      'table': "A piece of furniture with four legs used for eating or writing.",
+      'bicycle': "A two-wheeled vehicle that you pedal.",
+      'school': "A place where children go to learn.",
+      'family': "A group of people related to each other.",
+      'computer': "A device used for work, play, or learning."
+    }
+  };
 
   const getNewWord = () => {
     const wordPool = words[ageRange];
@@ -41,94 +40,101 @@ const WordGame = () => {
 
   const checkGuess = () => {
     if (guess.toLowerCase() === currentWord) {
-      setMessage('🎉 Correct! You are amazing! 🌟');
+      setMessage('🎉 Correct! You are amazing! ⭐');
       setGameActive(false);
     } else {
       const newAttempts = attemptsLeft - 1;
       setAttemptsLeft(newAttempts);
       if (newAttempts === 0) {
-        setMessage(`Game Over! The word was: ${currentWord} 💫`);
+        setMessage(`Game Over! The word was: ${currentWord} 🌟`);
         setGameActive(false);
       } else {
-        setMessage(`Try again! You have ${newAttempts} tries left! 💪`);
+        setMessage(`Try again! You have ${newAttempts} tries left! 💫`);
       }
     }
     setGuess('');
   };
 
   return (
-    <div className="max-w-2xl mx-auto p-6 text-center bg-gradient-to-b from-pink-100 to-purple-100 rounded-lg shadow-xl">
-      <h1 className="text-4xl font-bold mb-8 text-purple-600">Fun Word Game! 🎮</h1>
-      
-      <div className="mb-6 space-y-2">
-        <p className="text-xl font-semibold text-purple-700">Pick your age group:</p>
-        <div className="flex justify-center gap-4">
-          <button 
-            className={`px-4 py-2 rounded-full font-bold ${ageRange === '2-4' 
-              ? 'bg-pink-500 text-white' 
-              : 'bg-pink-200 text-pink-700'}`}
-            onClick={() => setAgeRange('2-4')}
-          >
-            Ages 2-4
-          </button>
-          <button 
-            className={`px-4 py-2 rounded-full font-bold ${ageRange === '5-7' 
-              ? 'bg-purple-500 text-white' 
-              : 'bg-purple-200 text-purple-700'}`}
-            onClick={() => setAgeRange('5-7')}
-          >
-            Ages 5-7
-          </button>
+    <div className="max-w-2xl mx-auto p-8 bg-gradient-to-r from-pink-100 to-purple-100 rounded-2xl shadow-xl">
+      <h1 className="text-5xl font-bold mb-8 text-center text-purple-600">
+        Fun Word Game! 🎮
+      </h1>
+
+      <div className="space-y-6">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-purple-700 mb-4">
+            Pick your age group:
+          </h2>
+          <div className="flex justify-center gap-4">
+            {['2-4', '5-7'].map((age) => (
+              <button
+                key={age}
+                onClick={() => setAgeRange(age)}
+                className={`px-6 py-3 rounded-full text-xl font-bold transition-all duration-300 transform hover:scale-105 
+                  ${ageRange === age 
+                    ? 'bg-pink-500 text-white shadow-lg' 
+                    : 'bg-white text-pink-500 hover:bg-pink-100'}`}
+              >
+                Ages {age}
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
 
-      {currentHint && (
-        <div className="mb-6 p-4 bg-white rounded-lg shadow">
-          <p className="text-lg font-medium text-gray-700">
-            Hint: {currentHint} 💭
-          </p>
-        </div>
-      )}
-
-      <div className="space-y-4 mb-6">
-        <input
-          type="text"
-          value={guess}
-          onChange={(e) => setGuess(e.target.value)}
-          placeholder="Type your guess here!"
-          className="w-64 p-3 text-lg border-2 border-purple-300 rounded-lg focus:outline-none focus:border-purple-500"
-          disabled={!gameActive}
-          onKeyPress={(e) => {
-            if (e.key === 'Enter' && gameActive) {
-              checkGuess();
-            }
-          }}
-        />
-      </div>
-
-      <div className="flex justify-center gap-4 mb-6">
-        <button
-          onClick={checkGuess}
-          disabled={!gameActive || !guess}
-          className="px-6 py-3 bg-green-500 text-white font-bold rounded-lg shadow hover:bg-green-600 disabled:bg-gray-300"
-        >
-          Guess! 🎯
-        </button>
-        <button
-          onClick={getNewWord}
-          className="px-6 py-3 bg-blue-500 text-white font-bold rounded-lg shadow hover:bg-blue-600"
-        >
-          New Word! ⭐
-        </button>
-      </div>
-
-      <div className="mt-6">
-        <p className="text-xl font-bold text-purple-600">{message}</p>
-        {gameActive && (
-          <p className="text-lg font-medium text-purple-500">
-            Tries left: {attemptsLeft} 🎲
-          </p>
+        {currentHint && (
+          <div className="bg-white p-6 rounded-xl shadow-lg">
+            <p className="text-xl text-purple-700">
+              <span className="font-bold">Hint:</span> {currentHint} 💭
+            </p>
+          </div>
         )}
+
+        <div className="flex flex-col items-center gap-4">
+          <input
+            type="text"
+            value={guess}
+            onChange={(e) => setGuess(e.target.value)}
+            onKeyPress={(e) => {
+              if (e.key === 'Enter' && gameActive) {
+                checkGuess();
+              }
+            }}
+            placeholder="Type your guess here! ✨"
+            className="w-full max-w-md p-4 text-xl border-3 border-purple-300 rounded-xl 
+              focus:outline-none focus:border-purple-500 text-center"
+            disabled={!gameActive}
+          />
+          
+          <div className="flex gap-4">
+            <button
+              onClick={checkGuess}
+              disabled={!gameActive || !guess}
+              className="px-6 py-3 bg-green-500 text-white text-xl font-bold rounded-xl 
+                shadow-lg hover:bg-green-600 transition-colors duration-300 
+                disabled:bg-gray-300 disabled:cursor-not-allowed"
+            >
+              Guess! 🎯
+            </button>
+            
+            <button
+              onClick={getNewWord}
+              className="px-6 py-3 bg-blue-500 text-white text-xl font-bold rounded-xl 
+                shadow-lg hover:bg-blue-600 transition-colors duration-300"
+            >
+              New Word! ⭐
+            </button>
+          </div>
+        </div>
+
+        <div className="text-center space-y-2">
+          <p className="text-2xl font-bold text-purple-600">{message}</p>
+          {gameActive && (
+            <p className="text-xl font-medium text-purple-500">
+              Tries left: {attemptsLeft} 🎲
+            </p>
+          )}
+        </div>
       </div>
     </div>
   );
