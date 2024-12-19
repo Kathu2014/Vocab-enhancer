@@ -1,152 +1,283 @@
-import React, { useState } from 'react';
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fun Word Game!</title>
+    <style>
+        body {
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            background: linear-gradient(to right, #fce4ec, #f3e5f5);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
 
-const WordGame = () => {
-  const [ageRange, setAgeRange] = useState('2-4');
-  const [currentWord, setCurrentWord] = useState('');
-  const [currentHint, setCurrentHint] = useState('');
-  const [guess, setGuess] = useState('');
-  const [attemptsLeft, setAttemptsLeft] = useState(3);
-  const [message, setMessage] = useState('Press "New Word" to start! 🎮');
-  const [gameActive, setGameActive] = useState(false);
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            width: 100%;
+        }
 
-  const words = {
-    '2-4': {
-      'apple': "A fruit that is red or green, often eaten by children.",
-      'dog': "A common pet with four legs that barks.",
-      'milk': "A white liquid that comes from cows, often drunk by babies.",
-      'ball': "A round object used in many games.",
-      'sun': "The star that gives us light and warmth."
-    },
-    '5-7': {
-      'table': "A piece of furniture with four legs used for eating or writing.",
-      'bicycle': "A two-wheeled vehicle that you pedal.",
-      'school': "A place where children go to learn.",
-      'family': "A group of people related to each other.",
-      'computer': "A device used for work, play, or learning."
-    }
-  };
+        h1 {
+            color: #9c27b0;
+            text-align: center;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+        }
 
-  const getNewWord = () => {
-    const wordPool = words[ageRange];
-    const wordList = Object.entries(wordPool);
-    const [word, hint] = wordList[Math.floor(Math.random() * wordList.length)];
-    setCurrentWord(word);
-    setCurrentHint(hint);
-    setAttemptsLeft(3);
-    setGuess('');
-    setMessage('Try to guess the word! 🎯');
-    setGameActive(true);
-  };
+        .subtitle {
+            text-align: center;
+            color: #ba68c8;
+            font-size: 1.2em;
+            margin-bottom: 30px;
+        }
 
-  const checkGuess = () => {
-    if (guess.toLowerCase() === currentWord) {
-      setMessage('🎉 Correct! You are amazing! ⭐');
-      setGameActive(false);
-    } else {
-      const newAttempts = attemptsLeft - 1;
-      setAttemptsLeft(newAttempts);
-      if (newAttempts === 0) {
-        setMessage(`Game Over! The word was: ${currentWord} 🌟`);
-        setGameActive(false);
-      } else {
-        setMessage(`Try again! You have ${newAttempts} tries left! 💫`);
-      }
-    }
-    setGuess('');
-  };
+        .age-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
 
-  return (
-    <div className="max-w-2xl mx-auto p-8 bg-white rounded-2xl shadow-xl">
-      <div className="text-center mb-8">
-        <h1 className="text-5xl font-bold text-purple-600 mb-2">
-          Word Game! 🎮
-        </h1>
-        <p className="text-2xl text-purple-400">Learn new words and have fun! ✨</p>
-      </div>
+        .age-button {
+            padding: 12px 24px;
+            border-radius: 25px;
+            border: none;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
 
-      <div className="space-y-8">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-purple-700 mb-4">
-            Pick your age group:
-          </h2>
-          <div className="flex justify-center gap-4">
-            <button
-              onClick={() => setAgeRange('2-4')}
-              className={`age-button ${
-                ageRange === '2-4'
-                  ? 'bg-pink-500 text-white'
-                  : 'bg-pink-100 text-pink-500'
-              }`}
-            >
-              Ages 2-4
-            </button>
-            <button
-              onClick={() => setAgeRange('5-7')}
-              className={`age-button ${
-                ageRange === '5-7'
-                  ? 'bg-purple-500 text-white'
-                  : 'bg-purple-100 text-purple-500'
-              }`}
-            >
-              Ages 5-7
-            </button>
-          </div>
+        .age-button:hover {
+            transform: scale(1.05);
+        }
+
+        .age-button.active {
+            background-color: #e91e63;
+            color: white;
+        }
+
+        .age-button:not(.active) {
+            background-color: #fce4ec;
+            color: #e91e63;
+        }
+
+        .hint-box {
+            background-color: #e3f2fd;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+            color: #1976d2;
+        }
+
+        .input-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        input {
+            width: 80%;
+            padding: 12px;
+            font-size: 1.1em;
+            border: 2px solid #9c27b0;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #e91e63;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+        }
+
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        .guess-button {
+            background-color: #4caf50;
+            color: white;
+        }
+
+        .guess-button:hover:not(:disabled) {
+            background-color: #45a049;
+        }
+
+        .new-word-button {
+            background-color: #2196f3;
+            color: white;
+        }
+
+        .new-word-button:hover {
+            background-color: #1976d2;
+        }
+
+        .message {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 1.2em;
+            color: #9c27b0;
+            font-weight: bold;
+        }
+
+        .attempts {
+            text-align: center;
+            margin-top: 10px;
+            font-size: 1.1em;
+            color: #e91e63;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Word Game! 🎮</h1>
+        <p class="subtitle">Learn new words and have fun! ✨</p>
+        
+        <div class="age-buttons">
+            <button class="age-button active" data-age="2-4">Ages 2-4</button>
+            <button class="age-button" data-age="5-7">Ages 5-7</button>
         </div>
 
-        {currentHint && (
-          <div className="bg-blue-50 p-6 rounded-xl">
-            <p className="text-xl text-blue-700">
-              <span className="font-bold">Hint:</span> {currentHint} 💡
-            </p>
-          </div>
-        )}
-
-        <div className="space-y-4">
-          <input
-            type="text"
-            value={guess}
-            onChange={(e) => setGuess(e.target.value)}
-            onKeyPress={(e) => {
-              if (e.key === 'Enter' && gameActive) {
-                checkGuess();
-              }
-            }}
-            placeholder="Type your guess here! ✨"
-            className="w-full p-4 text-xl border-2 border-purple-300 rounded-xl 
-                     focus:outline-none focus:border-purple-500 text-center"
-            disabled={!gameActive}
-          />
-          
-          <div className="flex justify-center gap-4">
-            <button
-              onClick={checkGuess}
-              disabled={!gameActive || !guess}
-              className="game-button bg-green-500 text-white 
-                       disabled:bg-gray-300 disabled:cursor-not-allowed"
-            >
-              Guess! 🎯
-            </button>
-            
-            <button
-              onClick={getNewWord}
-              className="game-button bg-blue-500 text-white"
-            >
-              New Word! ⭐
-            </button>
-          </div>
+        <div class="hint-box" id="hint-box" style="display: none;">
+            <strong>Hint:</strong> <span id="hint-text"></span> 💡
         </div>
 
-        <div className="text-center space-y-2">
-          <p className="text-2xl font-bold text-purple-600">{message}</p>
-          {gameActive && (
-            <p className="text-xl font-medium text-purple-500">
-              Tries left: {attemptsLeft} 🎲
-            </p>
-          )}
+        <div class="input-area">
+            <input type="text" id="guess-input" placeholder="Type your guess here! ✨" disabled>
+            <div class="button-group">
+                <button class="guess-button" id="guess-button" disabled>Guess! 🎯</button>
+                <button class="new-word-button" id="new-word-button">New Word! ⭐</button>
+            </div>
         </div>
-      </div>
+
+        <p class="message" id="message">Press "New Word" to start! 🎮</p>
+        <p class="attempts" id="attempts"></p>
     </div>
-  );
-};
 
-export default WordGame;
+    <script>
+        const words = {
+            '2-4': {
+                'apple': "A fruit that is red or green, often eaten by children.",
+                'dog': "A common pet with four legs that barks.",
+                'milk': "A white liquid that comes from cows.",
+                'ball': "A round object used in many games.",
+                'sun': "The star that gives us light and warmth."
+            },
+            '5-7': {
+                'table': "A piece of furniture with four legs.",
+                'bicycle': "A two-wheeled vehicle that you pedal.",
+                'school': "A place where children go to learn.",
+                'family': "A group of people related to each other.",
+                'computer': "A device used for work and play."
+            }
+        };
+
+        let currentWord = '';
+        let attemptsLeft = 3;
+        let selectedAge = '2-4';
+        let gameActive = false;
+
+        // DOM Elements
+        const hintBox = document.getElementById('hint-box');
+        const hintText = document.getElementById('hint-text');
+        const guessInput = document.getElementById('guess-input');
+        const guessButton = document.getElementById('guess-button');
+        const newWordButton = document.getElementById('new-word-button');
+        const message = document.getElementById('message');
+        const attempts = document.getElementById('attempts');
+        const ageButtons = document.querySelectorAll('.age-button');
+
+        // Age button click handlers
+        ageButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                ageButtons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+                selectedAge = button.dataset.age;
+            });
+        });
+
+        // New word handler
+        newWordButton.addEventListener('click', () => {
+            const wordPool = words[selectedAge];
+            const wordList = Object.entries(wordPool);
+            const [word, hint] = wordList[Math.floor(Math.random() * wordList.length)];
+            
+            currentWord = word;
+            hintText.textContent = hint;
+            hintBox.style.display = 'block';
+            attemptsLeft = 3;
+            gameActive = true;
+            
+            guessInput.value = '';
+            guessInput.disabled = false;
+            guessButton.disabled = false;
+            message.textContent = 'Try to guess the word! 🎯';
+            attempts.textContent = `Tries left: ${attemptsLeft} 🎲`;
+            
+            guessInput.focus();
+        });
+
+        // Guess handler
+        const checkGuess = () => {
+            if (!gameActive || !guessInput.value) return;
+
+            const guess = guessInput.value.toLowerCase();
+            if (guess === currentWord) {
+                message.textContent = '🎉 Correct! You are amazing! ⭐';
+                gameActive = false;
+                guessInput.disabled = true;
+                guessButton.disabled = true;
+                attempts.textContent = '';
+            } else {
+                attemptsLeft--;
+                if (attemptsLeft === 0) {
+                    message.textContent = `Game Over! The word was: ${currentWord} 🌟`;
+                    gameActive = false;
+                    guessInput.disabled = true;
+                    guessButton.disabled = true;
+                    attempts.textContent = '';
+                } else {
+                    message.textContent = `Try again! You have ${attemptsLeft} tries left! 💫`;
+                    attempts.textContent = `Tries left: ${attemptsLeft} 🎲`;
+                }
+            }
+            guessInput.value = '';
+            if (gameActive) guessInput.focus();
+        };
+
+        guessButton.addEventListener('click', checkGuess);
+        guessInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') checkGuess();
+        });
+
+        // Enable guess button when input has content
+        guessInput.addEventListener('input', () => {
+            guessButton.disabled = !guessInput.value || !gameActive;
+        });
+    </script>
+</body>
+</html>
