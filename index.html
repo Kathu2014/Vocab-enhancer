@@ -1,91 +1,283 @@
 <!DOCTYPE html>
 <html lang="en">
-<!-- Previous head and style sections remain the same -->
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fun Word Game!</title>
     <style>
-        /* ... (keep all the previous CSS) ... */
-        .almost-correct {
-            background-color: #fff3cd;
-            padding: 10px;
-            border-radius: 10px;
-            margin-top: 10px;
-            color: #856404;
+        body {
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            background: linear-gradient(to right, #fce4ec, #f3e5f5);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            width: 100%;
+        }
+
+        h1 {
+            color: #9c27b0;
+            text-align: center;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #ba68c8;
+            font-size: 1.2em;
+            margin-bottom: 30px;
+        }
+
+        .age-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .age-button {
+            padding: 12px 24px;
+            border-radius: 25px;
+            border: none;
             font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .age-button:hover {
+            transform: scale(1.05);
+        }
+
+        .age-button.active {
+            background-color: #e91e63;
+            color: white;
+        }
+
+        .age-button:not(.active) {
+            background-color: #fce4ec;
+            color: #e91e63;
+        }
+
+        .hint-box {
+            background-color: #e3f2fd;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+            color: #1976d2;
+        }
+
+        .input-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        input {
+            width: 80%;
+            padding: 12px;
+            font-size: 1.1em;
+            border: 2px solid #9c27b0;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #e91e63;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+        }
+
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        .guess-button {
+            background-color: #4caf50;
+            color: white;
+        }
+
+        .guess-button:hover:not(:disabled) {
+            background-color: #45a049;
+        }
+
+        .new-word-button {
+            background-color: #2196f3;
+            color: white;
+        }
+
+        .new-word-button:hover {
+            background-color: #1976d2;
+        }
+
+        .message {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 1.2em;
+            color: #9c27b0;
+            font-weight: bold;
+        }
+
+        .attempts {
+            text-align: center;
+            margin-top: 10px;
+            font-size: 1.1em;
+            color: #e91e63;
         }
     </style>
 </head>
 <body>
-    <!-- Previous HTML structure remains the same -->
+    <div class="container">
+        <h1>Word Game! 🎮</h1>
+        <p class="subtitle">Learn new words and have fun! ✨</p>
+        
+        <div class="age-buttons">
+            <button class="age-button active" data-age="2-4">Ages 2-4</button>
+            <button class="age-button" data-age="5-7">Ages 5-7</button>
+        </div>
+
+        <div class="hint-box" id="hint-box" style="display: none;">
+            <strong>Hint:</strong> <span id="hint-text"></span> 💡
+        </div>
+
+        <div class="input-area">
+            <input type="text" id="guess-input" placeholder="Type your guess here! ✨" disabled>
+            <div class="button-group">
+                <button class="guess-button" id="guess-button" disabled>Guess! 🎯</button>
+                <button class="new-word-button" id="new-word-button">New Word! ⭐</button>
+            </div>
+        </div>
+
+        <p class="message" id="message">Press "New Word" to start! 🎮</p>
+        <p class="attempts" id="attempts"></p>
+    </div>
+
     <script>
-        // Previous code remains the same until the checkGuess function
-
-        // Add this helper function to calculate string similarity
-        function calculateSimilarity(str1, str2) {
-            // Convert both strings to lowercase for comparison
-            str1 = str1.toLowerCase();
-            str2 = str2.toLowerCase();
-            
-            // If strings are exactly the same, return 1
-            if (str1 === str2) return 1;
-            
-            // If one string contains the other, it's probably a typo
-            if (str1.includes(str2) || str2.includes(str1)) return 0.9;
-            
-            // Count matching characters
-            let matches = 0;
-            const longer = str1.length > str2.length ? str1 : str2;
-            const shorter = str1.length > str2.length ? str2 : str1;
-            
-            // Count exact character matches
-            for (let i = 0; i < shorter.length; i++) {
-                if (shorter[i] === longer[i]) matches++;
+        const words = {
+            '2-4': {
+                'apple': "A fruit that is red or green, often eaten by children.",
+                'dog': "A common pet with four legs that barks.",
+                'milk': "A white liquid that comes from cows.",
+                'ball': "A round object used in many games.",
+                'sun': "The star that gives us light and warmth."
+            },
+            '5-7': {
+                'table': "A piece of furniture with four legs.",
+                'bicycle': "A two-wheeled vehicle that you pedal.",
+                'school': "A place where children go to learn.",
+                'family': "A group of people related to each other.",
+                'computer': "A device used for work and play."
             }
-            
-            // Calculate similarity score
-            return matches / longer.length;
-        }
+        };
 
-        // Modified checkGuess function
+        let currentWord = '';
+        let attemptsLeft = 3;
+        let selectedAge = '2-4';
+        let gameActive = false;
+
+        // DOM Elements
+        const hintBox = document.getElementById('hint-box');
+        const hintText = document.getElementById('hint-text');
+        const guessInput = document.getElementById('guess-input');
+        const guessButton = document.getElementById('guess-button');
+        const newWordButton = document.getElementById('new-word-button');
+        const message = document.getElementById('message');
+        const attempts = document.getElementById('attempts');
+        const ageButtons = document.querySelectorAll('.age-button');
+
+        // Age button click handlers
+        ageButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                ageButtons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+                selectedAge = button.dataset.age;
+            });
+        });
+
+        // New word handler
+        newWordButton.addEventListener('click', () => {
+            const wordPool = words[selectedAge];
+            const wordList = Object.entries(wordPool);
+            const [word, hint] = wordList[Math.floor(Math.random() * wordList.length)];
+            
+            currentWord = word;
+            hintText.textContent = hint;
+            hintBox.style.display = 'block';
+            attemptsLeft = 3;
+            gameActive = true;
+            
+            guessInput.value = '';
+            guessInput.disabled = false;
+            guessButton.disabled = false;
+            message.textContent = 'Try to guess the word! 🎯';
+            attempts.textContent = `Tries left: ${attemptsLeft} 🎲`;
+            
+            guessInput.focus();
+        });
+
+        // Guess handler
         const checkGuess = () => {
             if (!gameActive || !guessInput.value) return;
 
             const guess = guessInput.value.toLowerCase();
-            const similarity = calculateSimilarity(guess, currentWord);
-
             if (guess === currentWord) {
                 message.textContent = '🎉 Correct! You are amazing! ⭐';
                 gameActive = false;
-            } else if (similarity >= 0.75) { // If it's close enough to be a typo
-                message.innerHTML = `
-                    <div>🎉 Almost perfect! That's just a small typo!</div>
-                    <div class="almost-correct">You typed "${guess}" - The word was "${currentWord}" but you got it! ⭐</div>
-                `;
-                gameActive = false;
+                guessInput.disabled = true;
+                guessButton.disabled = true;
+                attempts.textContent = '';
             } else {
                 attemptsLeft--;
                 if (attemptsLeft === 0) {
                     message.textContent = `Game Over! The word was: ${currentWord} 🌟`;
                     gameActive = false;
+                    guessInput.disabled = true;
+                    guessButton.disabled = true;
+                    attempts.textContent = '';
                 } else {
                     message.textContent = `Try again! You have ${attemptsLeft} tries left! 💫`;
                     attempts.textContent = `Tries left: ${attemptsLeft} 🎲`;
                 }
             }
-
-            if (!gameActive) {
-                guessInput.disabled = true;
-                guessButton.disabled = true;
-                attempts.textContent = '';
-            }
-            
             guessInput.value = '';
             if (gameActive) guessInput.focus();
         };
 
-        // Rest of the code remains the same...
+        guessButton.addEventListener('click', checkGuess);
+        guessInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') checkGuess();
+        });
+
+        // Enable guess button when input has content
+        guessInput.addEventListener('input', () => {
+            guessButton.disabled = !guessInput.value || !gameActive;
+        });
     </script>
 </body>
 </html>
