@@ -1,54 +1,92 @@
-from flask import Flask, render_template, request, jsonify
 import random
+import os
+import time
 
-app = Flask(__name__)
+class WordGuessingGame:
+    def __init__(self):
+        # Word pool for different age groups
+        self.words = {
+            '2-4': {
+                'apple': "A fruit that is red or green, often eaten by children.",
+                'dog': "A common pet with four legs that barks.",
+                'milk': "A white liquid that comes from cows, often drunk by babies.",
+                'ball': "A round object used in many games.",
+                'sun': "The star that gives us light and warmth."
+            },
+            '5-7': {
+                'table': "A piece of furniture with four legs used for eating or writing.",
+                'bicycle': "A two-wheeled vehicle that you pedal.",
+                'school': "A place where children go to learn.",
+                'family': "A group of people related to each other.",
+                'computer': "A device used for work, play, or learning."
+            }
+        }
+        self.max_attempts = 3
+        self.current_word = ""
+        self.current_hint = ""
+        self.attempts_left = self.max_attempts
 
-# Word pool for different age groups
-words = {
-    '2-4': {
-        'apple': "A fruit that is red or green, often eaten by children.",
-        'dog': "A common pet with four legs that barks.",
-        'milk': "A white liquid that comes from cows, often drunk by babies.",
-        'ball': "A round object used in many games.",
-        'sun': "The star that gives us light and warmth."
-    },
-    '5-7': {
-        'table': "A piece of furniture with four legs used for eating or writing.",
-        'bicycle': "A two-wheeled vehicle that you pedal.",
-        'school': "A place where children go to learn.",
-        'family': "A group of people related to each other.",
-        'computer': "A device used for work, play, or learning."
-    }
-}
+    def clear_screen(self):
+        os.system('cls' if os.name == 'nt' else 'clear')
 
-# Route to serve the game page
-@app.route('/')
-def index():
-    return render_template('index.html')
+    def select_age_range(self):
+        while True:
+            self.clear_screen()
+            print("\n=== Word Guessing Game ===\n")
+            print("Select age range:")
+            print("1. Ages 2-4")
+            print("2. Ages 5-7")
+            choice = input("\nEnter your choice (1 or 2): ")
+            
+            if choice == '1':
+                return '2-4'
+            elif choice == '2':
+                return '5-7'
+            else:
+                print("\nInvalid choice. Please try again.")
+                time.sleep(1)
 
-# Route to generate a new word based on the selected age group
-@app.route('/new_word', methods=['POST'])
-def new_word():
-    age_range = request.form['age_range']
-    word_pool = words[age_range]
-    word, hint = random.choice(list(word_pool.items()))
-    return jsonify({'word': word, 'hint': hint, 'attempts_left': 3})
+    def new_word(self, age_range):
+        word_pool = self.words[age_range]
+        self.current_word, self.current_hint = random.choice(list(word_pool.items()))
+        self.attempts_left = self.max_attempts
 
-# Route to check the guess
-@app.route('/check_guess', methods=['POST'])
-def check_guess():
-    word = request.form['word']
-    guess = request.form['guess']
-    attempts_left = int(request.form['attempts_left'])
-    
-    if guess == word:
-        return jsonify({'result': 'Correct!', 'attempts_left': attempts_left})
-    
-    attempts_left -= 1
-    if attempts_left == 0:
-        return jsonify({'result': f'Game Over! The word was {word}.', 'attempts_left': attempts_left})
-    else:
-        return jsonify({'result': 'Incorrect! Try again.', 'attempts_left': attempts_left})
+    def display_game_state(self):
+        print(f"\nHint: {self.current_hint}")
+        print(f"Attempts left: {self.attempts_left}")
+        print("=" * 30)
+
+    def play_round(self):
+        self.display_game_state()
+        guess = input("\nEnter your guess: ").lower().strip()
+        
+        if guess == self.current_word:
+            print("\nCorrect! You won! 🎉")
+            return True
+        
+        self.attempts_left -= 1
+        if self.attempts_left == 0:
+            print(f"\nGame Over! The word was: {self.current_word}")
+            return True
+        
+        print("\nIncorrect! Try again!")
+        return False
+
+    def play_game(self):
+        while True:
+            age_range = self.select_age_range()
+            self.new_word(age_range)
+            
+            game_over = False
+            while not game_over:
+                self.clear_screen()
+                game_over = self.play_round()
+            
+            play_again = input("\nWould you like to play again? (yes/no): ").lower()
+            if play_again != 'yes':
+                print("\nThanks for playing! Goodbye!")
+                break
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    game = WordGuessingGame()
+    game.play_game()
