@@ -1,92 +1,137 @@
-import random
-import os
-import time
+import React, { useState } from 'react';
 
-class WordGuessingGame:
-    def __init__(self):
-        # Word pool for different age groups
-        self.words = {
-            '2-4': {
-                'apple': "A fruit that is red or green, often eaten by children.",
-                'dog': "A common pet with four legs that barks.",
-                'milk': "A white liquid that comes from cows, often drunk by babies.",
-                'ball': "A round object used in many games.",
-                'sun': "The star that gives us light and warmth."
-            },
-            '5-7': {
-                'table': "A piece of furniture with four legs used for eating or writing.",
-                'bicycle': "A two-wheeled vehicle that you pedal.",
-                'school': "A place where children go to learn.",
-                'family': "A group of people related to each other.",
-                'computer': "A device used for work, play, or learning."
+// Word dictionary for different age groups
+const words = {
+  '2-4': {
+    'apple': "A fruit that is red or green, often eaten by children.",
+    'dog': "A common pet with four legs that barks.",
+    'milk': "A white liquid that comes from cows, often drunk by babies.",
+    'ball': "A round object used in many games.",
+    'sun': "The star that gives us light and warmth."
+  },
+  '5-7': {
+    'table': "A piece of furniture with four legs used for eating or writing.",
+    'bicycle': "A two-wheeled vehicle that you pedal.",
+    'school': "A place where children go to learn.",
+    'family': "A group of people related to each other.",
+    'computer': "A device used for work, play, or learning."
+  }
+};
+
+const WordGame = () => {
+  const [ageRange, setAgeRange] = useState('2-4');
+  const [currentWord, setCurrentWord] = useState('');
+  const [currentHint, setCurrentHint] = useState('');
+  const [guess, setGuess] = useState('');
+  const [attemptsLeft, setAttemptsLeft] = useState(3);
+  const [message, setMessage] = useState('Press "New Word" to start! 🎮');
+  const [gameActive, setGameActive] = useState(false);
+
+  const getNewWord = () => {
+    const wordPool = words[ageRange];
+    const wordList = Object.entries(wordPool);
+    const [word, hint] = wordList[Math.floor(Math.random() * wordList.length)];
+    setCurrentWord(word);
+    setCurrentHint(hint);
+    setAttemptsLeft(3);
+    setGuess('');
+    setMessage('Try to guess the word! 🎯');
+    setGameActive(true);
+  };
+
+  const checkGuess = () => {
+    if (guess.toLowerCase() === currentWord) {
+      setMessage('🎉 Correct! You are amazing! 🌟');
+      setGameActive(false);
+    } else {
+      const newAttempts = attemptsLeft - 1;
+      setAttemptsLeft(newAttempts);
+      if (newAttempts === 0) {
+        setMessage(`Game Over! The word was: ${currentWord} 💫`);
+        setGameActive(false);
+      } else {
+        setMessage(`Try again! You have ${newAttempts} tries left! 💪`);
+      }
+    }
+    setGuess('');
+  };
+
+  return (
+    <div className="max-w-2xl mx-auto p-6 text-center bg-gradient-to-b from-pink-100 to-purple-100 rounded-lg shadow-xl">
+      <h1 className="text-4xl font-bold mb-8 text-purple-600">Fun Word Game! 🎮</h1>
+      
+      <div className="mb-6 space-y-2">
+        <p className="text-xl font-semibold text-purple-700">Pick your age group:</p>
+        <div className="flex justify-center gap-4">
+          <button 
+            className={`px-4 py-2 rounded-full font-bold ${ageRange === '2-4' 
+              ? 'bg-pink-500 text-white' 
+              : 'bg-pink-200 text-pink-700'}`}
+            onClick={() => setAgeRange('2-4')}
+          >
+            Ages 2-4
+          </button>
+          <button 
+            className={`px-4 py-2 rounded-full font-bold ${ageRange === '5-7' 
+              ? 'bg-purple-500 text-white' 
+              : 'bg-purple-200 text-purple-700'}`}
+            onClick={() => setAgeRange('5-7')}
+          >
+            Ages 5-7
+          </button>
+        </div>
+      </div>
+
+      {currentHint && (
+        <div className="mb-6 p-4 bg-white rounded-lg shadow">
+          <p className="text-lg font-medium text-gray-700">
+            Hint: {currentHint} 💭
+          </p>
+        </div>
+      )}
+
+      <div className="space-y-4 mb-6">
+        <input
+          type="text"
+          value={guess}
+          onChange={(e) => setGuess(e.target.value)}
+          placeholder="Type your guess here!"
+          className="w-64 p-3 text-lg border-2 border-purple-300 rounded-lg focus:outline-none focus:border-purple-500"
+          disabled={!gameActive}
+          onKeyPress={(e) => {
+            if (e.key === 'Enter' && gameActive) {
+              checkGuess();
             }
-        }
-        self.max_attempts = 3
-        self.current_word = ""
-        self.current_hint = ""
-        self.attempts_left = self.max_attempts
+          }}
+        />
+      </div>
 
-    def clear_screen(self):
-        os.system('cls' if os.name == 'nt' else 'clear')
+      <div className="flex justify-center gap-4 mb-6">
+        <button
+          onClick={checkGuess}
+          disabled={!gameActive || !guess}
+          className="px-6 py-3 bg-green-500 text-white font-bold rounded-lg shadow hover:bg-green-600 disabled:bg-gray-300"
+        >
+          Guess! 🎯
+        </button>
+        <button
+          onClick={getNewWord}
+          className="px-6 py-3 bg-blue-500 text-white font-bold rounded-lg shadow hover:bg-blue-600"
+        >
+          New Word! ⭐
+        </button>
+      </div>
 
-    def select_age_range(self):
-        while True:
-            self.clear_screen()
-            print("\n=== Word Guessing Game ===\n")
-            print("Select age range:")
-            print("1. Ages 2-4")
-            print("2. Ages 5-7")
-            choice = input("\nEnter your choice (1 or 2): ")
-            
-            if choice == '1':
-                return '2-4'
-            elif choice == '2':
-                return '5-7'
-            else:
-                print("\nInvalid choice. Please try again.")
-                time.sleep(1)
+      <div className="mt-6">
+        <p className="text-xl font-bold text-purple-600">{message}</p>
+        {gameActive && (
+          <p className="text-lg font-medium text-purple-500">
+            Tries left: {attemptsLeft} 🎲
+          </p>
+        )}
+      </div>
+    </div>
+  );
+};
 
-    def new_word(self, age_range):
-        word_pool = self.words[age_range]
-        self.current_word, self.current_hint = random.choice(list(word_pool.items()))
-        self.attempts_left = self.max_attempts
-
-    def display_game_state(self):
-        print(f"\nHint: {self.current_hint}")
-        print(f"Attempts left: {self.attempts_left}")
-        print("=" * 30)
-
-    def play_round(self):
-        self.display_game_state()
-        guess = input("\nEnter your guess: ").lower().strip()
-        
-        if guess == self.current_word:
-            print("\nCorrect! You won! 🎉")
-            return True
-        
-        self.attempts_left -= 1
-        if self.attempts_left == 0:
-            print(f"\nGame Over! The word was: {self.current_word}")
-            return True
-        
-        print("\nIncorrect! Try again!")
-        return False
-
-    def play_game(self):
-        while True:
-            age_range = self.select_age_range()
-            self.new_word(age_range)
-            
-            game_over = False
-            while not game_over:
-                self.clear_screen()
-                game_over = self.play_round()
-            
-            play_again = input("\nWould you like to play again? (yes/no): ").lower()
-            if play_again != 'yes':
-                print("\nThanks for playing! Goodbye!")
-                break
-
-if __name__ == '__main__':
-    game = WordGuessingGame()
-    game.play_game()
+export default WordGame;
